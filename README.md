@@ -1,4 +1,4 @@
-Tibiantis Launcher
+Tibiantis Launcher [![.NET Core Desktop](https://github.com/Pyziol708/TibiantisLauncher/actions/workflows/dotnet-desktop.yml/badge.svg)](https://github.com/Pyziol708/TibiantisLauncher/actions/workflows/dotnet-desktop.yml)
 ===============
 Client config profile manager for Tibiantis.online Open Tibia Server
 
