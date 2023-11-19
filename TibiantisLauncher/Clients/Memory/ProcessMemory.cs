@@ -1,17 +1,23 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Text;
 
-namespace TibiantisLauncher.Clients
+namespace TibiantisLauncher.Clients.Memory
 {
-    public class ProcessMemory
+    internal class ProcessMemory
     {
         private readonly IntPtr _processHandle;
         private readonly long _baseAddress;
 
-        public ProcessMemory(IntPtr processHandle)
+        public ProcessMemory(Process process)
         {
-            _processHandle = processHandle;
-            _baseAddress = WinApi.GetBaseAddress(_processHandle).ToInt64();
+            _processHandle = process.Handle;
+            var processModule = process.MainModule;
+
+            if (processModule == null)
+                throw new NullReferenceException(nameof(processModule));
+
+            _baseAddress = processModule.BaseAddress.ToInt64();
         }
 
         #region Reading
@@ -39,6 +45,11 @@ namespace TibiantisLauncher.Clients
             }
 
             return stringBuilder.ToString();
+        }
+
+        public int ReadInt(long address)
+        {
+            return BitConverter.ToInt32(ReadBytes(address, 4), 0);
         }
         #endregion
 

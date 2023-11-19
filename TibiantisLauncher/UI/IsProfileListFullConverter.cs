@@ -6,7 +6,7 @@ using TibiantisLauncher.Profiles;
 
 namespace TibiantisLauncher.UI
 {
-    public class IsProfileListFullConverter : IValueConverter
+    internal class IsProfileListFullConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

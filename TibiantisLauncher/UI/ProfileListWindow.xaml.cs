@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Diagnostics;
+﻿using System.Collections.ObjectModel;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
-using System.Windows.Input;
-using System.Windows.Media.Animation;
 using TibiantisLauncher.Clients;
 using TibiantisLauncher.Profiles;
 using TibiantisLauncher.UI;
@@ -15,17 +9,12 @@ using TibiantisLauncher.Validation;
 
 namespace TibiantisLauncher
 {
-    /// <summary>
-    /// Logika interakcji dla klasy MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : Window
+    public partial class ProfileListWindow : Window
     {
-        private GameClient? _client;
-        private CamPlayer? _camPlayer;
         private readonly ProfileManager _profileManager;
         public ObservableCollection<Profile> Profiles => _profileManager.Profiles;
 
-        public MainWindow()
+        public ProfileListWindow()
         {
             InitializeComponent();
             _profileManager = ProfileManager.Instance;
@@ -118,8 +107,11 @@ namespace TibiantisLauncher
                 return;
             }
 
-            _client = new GameClient((Profile)ProfileListBox.SelectedItem);
-            _client.Start();
+            App.GameClient = new GameClient((Profile)ProfileListBox.SelectedItem);
+            App.GameClient.Exit += (sender, e) => Dispatcher.Invoke(Application.Current.Shutdown);
+            App.GameClient.Start();
+            App.Current.MainWindow = new GameClientOverlayWindow();
+            App.Current.MainWindow.Show();
             Thread.Sleep(1000);
             Close();
         }
@@ -138,10 +130,12 @@ namespace TibiantisLauncher
                 return;
             }
 
-            _camPlayer = new CamPlayer();
-            _camPlayer.Start();
+            App.CamPlayer = new CamPlayer();
+            App.CamPlayer.Start();
             Thread.Sleep(1000);
-            Close();
+            App.Current.MainWindow = new GameClientOverlayWindow();
+            App.Current.MainWindow.Show();
+            Application.Current.Shutdown();
         }
 
         private void ShowAddProfileWindow()
