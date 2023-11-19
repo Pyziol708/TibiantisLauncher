@@ -1,40 +1,54 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Threading;
+using TibiantisLauncher.Clients.Memory;
 using TibiantisLauncher.Profiles;
 using TibiantisLauncher.Validation;
 
 namespace TibiantisLauncher.Clients
 {
-    public class GameClient : Client
+    internal struct PlayerStats
+    {
+        public int Level { get; set; }
+        public int Experience { get; set; }
+        public int PositionX { get; set; }
+        public int PositionY { get; set; }
+        public int PositionZ { get; set; }
+    }
+
+    internal class GameClient : Client
     {
         public const string FileName = "Tibiantis.exe";
         private const string ProcessName = "Tibiantis";
-        private const long CfgPathMemoryAddress = 1418427;
+
         public const int CfgPathMaxLength = 23;
         public const string ClientVersion = "1.0";
-        public static string ClientFullPath => Path.Combine(ClientDirectoryFullPath, FileName);
-
-        private IntPtr _processHandle { get; set; }
-        //private IntPtr _windowHandle { get; set; } = IntPtr.Zero;
-        private ProcessMemory? _memory { get; set; }
-        private Profile _profile { get; init; }
 
         protected override string _clientFullPath => ClientFullPath;
+        public bool IsConnected { get => _memory?.ReadInt(MemoryAddresses.ConnectionStatus) > 8; }
+        public static string ClientFullPath => Path.Combine(ClientDirectoryFullPath, FileName);
+        private Profile? _profile { get; init; }
 
         public GameClient(Profile profile) : base()
         {
             _profile = profile;
         }
 
+        public GameClient(Process process)
+        {
+            _process = process;
+            _memory = new ProcessMemory(_process);
+            _window = new ClientWindow(_process.MainWindowHandle);
+            _process.EnableRaisingEvents = true;
+            _process.Exited += OnExit;
+        }
+
         public override void Start()
         {
-            GameClientValidator.ValidateCfgPath(_profile.CfgPath);
+            GameClientValidator.ValidateCfgPath(_profile?.CfgPath);
 
             base.Start();
-            _processHandle = WinApi.OpenProcess(0x1f0fff, 0, (uint)_process.Id);//TODO: verify that process.Handle has different access rights
-            _memory = new ProcessMemory(_processHandle);
+            _memory = new ProcessMemory(_process);
 
             WriteCfgPath();
         }
@@ -52,31 +66,32 @@ namespace TibiantisLauncher.Clients
             return process;
         }
 
-        //public void FindWindow()
-        //{
-        //    IntPtr windowHandle = IntPtr.Zero;
-
-        //    for (int i = 0; i < 50; i++)
-        //    {
-        //        Thread.Sleep(100);
-        //        windowHandle = WinApi.FindWindow("Tibiantis c", "Tibiantis       ");
-
-        //        if (windowHandle != IntPtr.Zero)
-        //        {
-        //            _windowHandle = windowHandle;
-        //            return;
-        //        }
-        //    }
-
-        //    throw new ApplicationException("Failed to attach to Tibiantis client window.");
-        //}
-
-        private void WriteCfgPath()
+        public void WriteCfgPath()
         {
             if (_memory is null)
                 throw new NullReferenceException(nameof(_memory));
 
-            _memory.WriteString(CfgPathMemoryAddress, _profile.CfgPath);
+            if (_profile is null)
+                throw new NullReferenceException(nameof(_profile));
+
+            _memory.WriteString(MemoryAddresses.CfgPath, _profile.CfgPath);
+        }
+
+        public PlayerStats ReadPlayerStats()
+        {
+            if (_memory is null)
+                throw new NullReferenceException(nameof(_memory));
+
+            var stats = new PlayerStats
+            {
+                Experience = _memory.ReadInt(MemoryAddresses.Experience),
+                Level = _memory.ReadInt(MemoryAddresses.Level),
+                PositionX = _memory.ReadInt(MemoryAddresses.PositionX),
+                PositionY = _memory.ReadInt(MemoryAddresses.PositionY),
+                PositionZ = _memory.ReadInt(MemoryAddresses.PositionZ)
+            };
+
+            return stats;
         }
     }
 }

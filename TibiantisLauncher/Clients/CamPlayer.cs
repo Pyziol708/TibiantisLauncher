@@ -2,7 +2,7 @@
 
 namespace TibiantisLauncher.Clients
 {
-    public class CamPlayer : Client
+    internal class CamPlayer : Client
     {
         public const string FileName = "CamPlayer.exe";
         protected override string _clientFullPath => ClientFullPath;

@@ -5,7 +5,7 @@ using TibiantisLauncher.Profiles;
 
 namespace TibiantisLauncher.UI
 {
-    public class ProfileCounterConverter : IValueConverter
+    internal class ProfileCounterConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

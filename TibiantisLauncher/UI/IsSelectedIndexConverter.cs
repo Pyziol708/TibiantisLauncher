@@ -4,7 +4,7 @@ using System.Windows.Data;
 
 namespace TibiantisLauncher.UI
 {
-    public class IsSelectedIndexConverter : IValueConverter
+    internal class IsSelectedIndexConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

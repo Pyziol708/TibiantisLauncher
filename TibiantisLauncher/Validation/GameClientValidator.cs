@@ -11,6 +11,7 @@ namespace TibiantisLauncher.Validation
             if (!File.Exists(GameClient.ClientFullPath))
                 throw new ValidationException($"{GameClient.FileName} not found. Extract Tibiantis Launcher files directly into Tibiantis client folder and try again.");
         }
+
         public static void ValidateCamPlayerExistence()
         {
             if (!File.Exists(CamPlayer.ClientFullPath))
@@ -30,10 +31,13 @@ namespace TibiantisLauncher.Validation
                 throw new ValidationException($"Unsupported Client version detected. This launcher supports Tibiantis Client v{GameClient.ClientVersion}.");
         }
 
-        public static void ValidateCfgPath(string path)
+        public static void ValidateCfgPath(string? path)
         {
+            if (string.IsNullOrEmpty(path))
+                throw new ValidationException($"Specified cfg path is empty.");
+
             if (path.Length > GameClient.CfgPathMaxLength)
-                throw new ValidationException($"Cfg path \"{path}\" is too long to inject.");
+                throw new ValidationException($"Specified cfg path \"{path}\" is too long to inject.");
         }
     }
 }

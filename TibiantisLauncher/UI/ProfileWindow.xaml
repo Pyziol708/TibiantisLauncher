@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TibiantisLauncher.UI"
         mc:Ignorable="d"
-        Title="Add Profile" Height="125" Width="400" WindowStyle="None" Topmost="True" WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+        Title="ADD PROFILE" Height="125" Width="400" WindowStyle="None" Topmost="True" WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
     <Border BorderThickness="1,1,1,1" Background="#FFD4C0A1" BorderBrush="#FF1B0101">
         <Grid>
             <Grid.RowDefinitions>
