@@ -12,12 +12,8 @@ namespace TibiantisLauncher.Clients.Memory
         public ProcessMemory(Process process)
         {
             _processHandle = process.Handle;
-            var processModule = process.MainModule;
 
-            if (processModule == null)
-                throw new NullReferenceException(nameof(processModule));
-
-            _baseAddress = processModule.BaseAddress.ToInt64();
+            _baseAddress = WinApi.GetBaseAddress(_processHandle).ToInt64();
         }
 
         #region Reading
