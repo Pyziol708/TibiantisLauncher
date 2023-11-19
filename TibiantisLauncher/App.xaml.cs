@@ -40,15 +40,9 @@ namespace TibiantisLauncher
             {
                 LauncherValidator.ValidateLauncherNotRunning();
                 ProfileManager.Instance.CreateProfilesDirectory();
-
-                var gameClientProcess = GameClient.FindClientProcess();
-                if (gameClientProcess == null)
-                {
-                    GameClientValidator.ValidateClientExistence();
-                    GameClientValidator.ValidateClientVersion();
-                }
-                else
-                    GameClient = new GameClient(gameClientProcess);
+                GameClientValidator.ValidateClientExistence();
+                GameClientValidator.ValidateClientVersion();
+                GameClientValidator.ValidateClientNotRunning();
             }
             catch (ValidationException ex)
             {
@@ -64,19 +58,19 @@ namespace TibiantisLauncher
                 return;
             }
 
-            //try
-            //{
-                Current.MainWindow = GameClient != null ? new GameClientOverlayWindow() : new ProfileListWindow();
+            try
+            {
+                Current.MainWindow = new ProfileListWindow();
                 if (GameClient != null)
                     GameClient.Exit += (sender, e) => Dispatcher.Invoke(Shutdown);
                 Current.MainWindow.Show();
-            //}
-            //catch (Exception ex)
-            //{
-            //    logger.Fatal(ex, "Application terminated unexpectedly");
-            //    MessageBox.Show("Tibiantis Launcher terminated unexpectedly. Please report this issue to k.standarski@gmail.com.\r\nPlease remember to attach tibiantis-launcher.log file!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            //    Shutdown(0x1);
-            //}
+            }
+            catch (Exception ex)
+            {
+                logger.Fatal(ex, "Application terminated unexpectedly");
+                MessageBox.Show("Tibiantis Launcher terminated unexpectedly. Please report this issue to k.standarski@gmail.com.\r\nPlease remember to attach tibiantis-launcher.log file!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                Shutdown(0x1);
+            }
         }
 
         private void Application_Exit(object sender, ExitEventArgs e)

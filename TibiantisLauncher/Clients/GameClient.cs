@@ -34,15 +34,6 @@ namespace TibiantisLauncher.Clients
             _profile = profile;
         }
 
-        public GameClient(Process process)
-        {
-            _process = process;
-            _memory = new ProcessMemory(_process);
-            _window = new ClientWindow(_process.MainWindowHandle);
-            _process.EnableRaisingEvents = true;
-            _process.Exited += OnExit;
-        }
-
         public override void Start()
         {
             GameClientValidator.ValidateCfgPath(_profile?.CfgPath);
