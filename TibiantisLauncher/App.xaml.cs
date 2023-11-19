@@ -25,7 +25,7 @@ namespace TibiantisLauncher
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Error()
+                .MinimumLevel.Debug()
                 .WriteTo.File("tibiantis-launcher.log")
                 .CreateLogger();
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Net;
 using System.Text;
 
 namespace TibiantisLauncher.Clients.Memory
@@ -17,6 +18,14 @@ namespace TibiantisLauncher.Clients.Memory
         }
 
         #region Reading
+        public int ReadPlayerId()
+        {
+            byte[] buffer = new byte[4];
+            WinApi.ReadProcessMemory(_processHandle, new IntPtr(0x19A1DC), buffer, 4, out _);
+
+            return BitConverter.ToInt32(buffer, 0);
+        }
+
         public byte ReadByte(long address)
         {
             return ReadBytes(address, 1)[0];

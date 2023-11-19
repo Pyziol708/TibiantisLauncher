@@ -113,6 +113,7 @@ namespace TibiantisLauncher
             App.Current.MainWindow = new GameClientOverlayWindow();
             App.Current.MainWindow.Show();
             Thread.Sleep(1000);
+            App.GameClient?.Window?.Activate();
             Close();
         }
 

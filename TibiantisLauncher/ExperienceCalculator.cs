@@ -76,7 +76,7 @@ namespace TibiantisLauncher
             if (_sessionStopWatch.IsRunning || _sessionStopWatch.Elapsed.TotalSeconds > 0)
             {
                 _experienceStats.ExperiencePerHour = RoundToHundred((int)Math.Floor(_experienceGained * 3600 / _sessionStopWatch.Elapsed.TotalSeconds));
-                var remainingMinutes = _experienceStats.RemainingExperience / (_experienceStats.ExperiencePerHour / 60);
+                var remainingMinutes = _experienceStats.ExperiencePerHour > 0 ? _experienceStats.RemainingExperience / (_experienceStats.ExperiencePerHour / 60) : 0;
                 _experienceStats.RemainingTotalMinutes = remainingMinutes;
             }
         }

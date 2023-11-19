@@ -11,9 +11,13 @@ namespace TibiantisLauncher.Clients
     {
         public int Level { get; set; }
         public int Experience { get; set; }
-        public int PositionX { get; set; }
-        public int PositionY { get; set; }
-        public int PositionZ { get; set; }
+    }
+
+    internal struct Position
+    {
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Z { get; set; }
     }
 
     internal class GameClient : Client
@@ -68,6 +72,35 @@ namespace TibiantisLauncher.Clients
             _memory.WriteString(MemoryAddresses.CfgPath, _profile.CfgPath);
         }
 
+        public Position ReadPlayerPosition()
+        {
+            var playerId = _memory?.ReadPlayerId();
+            var homePosition = new Position
+            {
+                X = 32369,
+                Y = 32240,
+                Z = 7
+            };
+
+            if (playerId == null)
+                return homePosition;
+
+            for (long i = MemoryAddresses.BattleListStart; i < MemoryAddresses.BattleListEnd; i += MemoryAddresses.BattleListCreatureSize)
+            {
+                if (_memory?.ReadInt(i) == playerId)
+                {
+                    return new Position
+                    {
+                        X = _memory.ReadInt(i + MemoryAddresses.BattleListOffsetPositionX),
+                        Y = _memory.ReadInt(i + MemoryAddresses.BattleListOffsetPositionY),
+                        Z = _memory.ReadInt(i + MemoryAddresses.BattleListOffsetPositionZ)
+                    };
+                }
+            }
+
+            return homePosition;
+        }
+
         public PlayerStats ReadPlayerStats()
         {
             if (_memory is null)
@@ -77,9 +110,6 @@ namespace TibiantisLauncher.Clients
             {
                 Experience = _memory.ReadInt(MemoryAddresses.Experience),
                 Level = _memory.ReadInt(MemoryAddresses.Level),
-                PositionX = _memory.ReadInt(MemoryAddresses.PositionX),
-                PositionY = _memory.ReadInt(MemoryAddresses.PositionY),
-                PositionZ = _memory.ReadInt(MemoryAddresses.PositionZ)
             };
 
             return stats;
