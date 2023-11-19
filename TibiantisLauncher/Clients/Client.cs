@@ -35,7 +35,7 @@ namespace TibiantisLauncher.Clients
             _process.StartInfo.UseShellExecute = false;
             _process.StartInfo.WorkingDirectory = @$"{clientDir}";
             _process.StartInfo.FileName = _clientFullPath;
-            _process.StartInfo.CreateNoWindow = true;
+            _process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
             _process.EnableRaisingEvents = true;
             _process.Exited += OnExit;
         }

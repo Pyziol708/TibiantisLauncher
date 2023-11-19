@@ -11,6 +11,7 @@ namespace TibiantisLauncher.Clients
         public ClientWindow(IntPtr windowHandle)
         {
             _windowHandle = windowHandle;
+            Activate();
         }
 
         public void Activate()
