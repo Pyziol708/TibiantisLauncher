@@ -13,6 +13,11 @@ namespace TibiantisLauncher.Clients
             _windowHandle = windowHandle;
         }
 
+        public void Activate()
+        {
+            WinApi.SetForegroundWindow(_windowHandle);
+        }
+
         public WindowState GetState()
         {
             if (_windowHandle == IntPtr.Zero)
