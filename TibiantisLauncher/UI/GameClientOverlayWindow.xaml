@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TibiantisLauncher"
         mc:Ignorable="d"
-        Title="GameClientOverlayWindow" Height="330" Width="213" Background="Transparent" WindowStyle="None" BorderBrush="Black" AllowsTransparency="True" Topmost="True" MaxWidth="215" MinWidth="215" MaxHeight="330" MinHeight="330" ResizeMode="NoResize" ShowInTaskbar="False">
+        Title="GameClientOverlayWindow" Height="330" Width="213" Background="Transparent" WindowStyle="None" BorderBrush="Black" AllowsTransparency="True" Topmost="True" MaxWidth="215" MinWidth="215" MaxHeight="330" MinHeight="330" ResizeMode="NoResize" ShowInTaskbar="False" GotFocus="OverlayWindow_GotFocus">
     <Window.Resources>
         <Style TargetType="Label">
             <Setter Property="Foreground" Value="#bfbfbf"/>

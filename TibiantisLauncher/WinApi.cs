@@ -7,6 +7,9 @@ namespace TibiantisLauncher
 {
     internal static class WinApi
     {
+        [return: MarshalAs(UnmanagedType.Bool)]
+        [DllImport("user32.dll")]
+        internal static extern bool SetForegroundWindow(IntPtr hWnd);
 
         [DllImport("kernel32.dll")]
         internal static extern void GetSystemInfo([MarshalAs(UnmanagedType.Struct)] out SYSTEM_INFO lpSystemInfo);

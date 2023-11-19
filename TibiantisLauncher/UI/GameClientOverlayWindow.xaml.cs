@@ -125,5 +125,10 @@ namespace TibiantisLauncher
         {
             Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
         }
+
+        private void OverlayWindow_GotFocus(object sender, RoutedEventArgs e)
+        {
+            App.GameClient?.Window?.Activate();
+        }
     }
 }
