@@ -19,29 +19,12 @@ namespace TibiantisLauncher.Clients
             WinApi.SetForegroundWindow(_windowHandle);
         }
 
-        public WindowState GetState()
+        public bool IsActive()
         {
             if (_windowHandle == IntPtr.Zero)
-                return WindowState.Minimized;
+                return false;
 
-            WinApi.WindowPlacement wp = default;
-            wp.length = (byte)System.Runtime.InteropServices.Marshal.SizeOf(typeof(WinApi.WindowPlacement));
-            if (!WinApi.GetWindowPlacement(_windowHandle, out wp))
-            {
-                return WindowState.Minimized;
-            }
-            switch (wp.showCmd)
-            {
-                case WinApi.ShowStates.SW_SHOWNORMAL:
-                case WinApi.ShowStates.SW_SHOWMAXIMIZED:
-                    if (WinApi.GetForegroundWindow() == _windowHandle)
-                    {
-                        return WindowState.Normal;
-                    }
-                    return WindowState.Minimized;
-                default:
-                    return WindowState.Minimized;
-            }
+            return WinApi.GetForegroundWindow() == _windowHandle;
         }
 
         public Rectangle? GetRect()

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Documents;
@@ -49,18 +50,23 @@ namespace TibiantisLauncher
 
             var newWindowState = WindowState.Normal;
 
-            var clientWindowState = window?.GetState();
-            if (clientWindowState == null || clientWindowState == WindowState.Minimized)
-                newWindowState = WindowState.Minimized;
+            if (IsFocused)
+                window?.Activate();
 
-            if (clientWindowState != WindowState.Minimized && WindowState == WindowState.Minimized)
+            if (window.IsActive())
                 newWindowState = WindowState.Normal;
+            else
+                newWindowState = WindowState.Minimized;
 
             if (!gameClient!.IsConnected)
                 newWindowState = WindowState.Minimized;
 
             if (WindowState != newWindowState)
+            {
                 WindowState = newWindowState;
+                if (newWindowState == WindowState.Normal)
+                    window?.Activate();
+            }
 
             var windowRect = window?.GetRect();
             if (windowRect != null)
@@ -96,7 +102,7 @@ namespace TibiantisLauncher
             LevelProgressBar.Value = _playerStats.Experience;
             ExperienceRemainingLabel.Content = string.Format("{0:0,0}", _experienceCalculator!.ExperienceStats.RemainingExperience);
             ExperiencePerHourLabel.Content = _experienceCalculator!.ExperienceStats.ExperiencePerHour > 0 ? string.Format("{0:0,0}", _experienceCalculator.ExperienceStats.ExperiencePerHour) : "-";
-            int hours = (int)Math.Floor((double)_experienceCalculator!.ExperienceStats.RemainingTotalMinutes / 60);
+            int hours = _experienceCalculator!.ExperienceStats.RemainingTotalMinutes > 0 ? (int)Math.Floor((double)_experienceCalculator!.ExperienceStats.RemainingTotalMinutes / 60) : 0;
             int minutes = _experienceCalculator.ExperienceStats.RemainingTotalMinutes % 60;
             var remaingTime = "";
             if (hours > 0)
@@ -118,7 +124,18 @@ namespace TibiantisLauncher
 
         private void MapViewerButton_Click(object sender, RoutedEventArgs e)
         {
-            OpenUrl($"https://tibiantis.info/library/map#{_playerStats.PositionX},{_playerStats.PositionY},{_playerStats.PositionZ},8");
+            var position = App.GameClient!.ReadPlayerPosition();
+            OpenUrl($"https://tibiantis.info/library/map#{position.X},{position.Y},{position.Z},8");
+        }
+
+        private void TibiantisInfoButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenUrl("https://tibiantis.info");
+        }
+
+        private void TibiantisXyzButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenUrl("https://tibiantis.xyz");
         }
 
         private void OpenUrl(string url)
