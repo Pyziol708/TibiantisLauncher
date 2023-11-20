@@ -8,12 +8,14 @@ Client config profile manager for Tibiantis.online Open Tibia Server
     lists, open channels),
 2.  shared map files between profiles,
 3.  cam files storage in one place, shared between profiles
+4.  exp/h counter
+5.  time to level
+6.  few quick links including map viewer showing your current location
 
 ## Will I get banned for using it?
 
 The goal of the project is **not** and **never will** be cheating or
-gaining the advantage over other players. The application is safe and
-does not interfere with the client upon launching.
+gaining the advantage over other players.
 
 ### How do I start with pre-compiled binary?
 
@@ -33,16 +35,16 @@ does not interfere with the client upon launching.
 At the time of writing this tutorial, it is not possible to
 import/duplicate profiles using GUI. You have to do it manually. At
 first, make sure your created your profile as described above. If your
-client is now running, please close it down. 1. Find your destination
-.cfg file you wish to be replaced: 1. open Tibiantis client installation
+client is now running, please close it down. 1. Find your desired .cfg
+file you wish to be replaced: 1. open Tibiantis client installation
 folder and go to *profiles* subfolder, 1. edit *profiles.xml* file, 1.
 search for your profile name in *Name* attribute of *Profile* tag, 1.
-the *CfgId* attribute is the equivalent of .cfg file number in
-*profiles* folder, 1. close *profiles.xml* editor. 1. Make a copy of
-your source .cfg file: - the default Tibiantis config file is placed in
-client installation folder: *Tibiantis/game/Tibiantis.cfg*, - you may
-also copy a .cfg file of desired profile from *profiles* folder. 1.
-Rename source file to match your destination .cfg file and replace it.
+the *CfgId* attribute is the equivalent of .cfg file name in *profiles*
+folder, 1. close *profiles.xml* editor. 1. Make a copy of your source
+.cfg file: - the default Tibiantis config file is placed in client
+installation folder: *Tibiantis/game/Tibiantis.cfg*, - you may also copy
+a .cfg file of desired profile from *profiles* folder. 1. Rename the
+file to match your desired .cfg and replace it.
 
 1.  Start Tibiantis Launcher and enjoy!
 
