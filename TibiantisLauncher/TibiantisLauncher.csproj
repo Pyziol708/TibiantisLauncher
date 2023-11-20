@@ -8,12 +8,14 @@
     <UseWPF>true</UseWPF>
     <StartupObject>TibiantisLauncher.App</StartupObject>
     <ApplicationIcon>Resources\Icons\Tibiantis.ico</ApplicationIcon>
-    <AssemblyVersion>1.1.0</AssemblyVersion>
-    <FileVersion>1.1.0</FileVersion>
+    <AssemblyVersion>1.1.1</AssemblyVersion>
+    <FileVersion>1.1.1</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="ChaparralPro-Regular.ttf" />
+    <None Remove="LICENSE" />
+    <None Remove="README.md" />
     <None Remove="Resources\button.png" />
     <None Remove="Resources\ChaparralPro-Bold.ttf" />
     <None Remove="Resources\ChaparralPro-Regular.ttf" />
@@ -56,11 +58,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Update="Properties\Settings.Designer.cs">
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-    </Compile>
     <Compile Update="UI\YesNoWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -74,9 +71,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    <None Update="LICENSE.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="README.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 

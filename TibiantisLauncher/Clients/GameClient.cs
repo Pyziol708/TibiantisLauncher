@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using TibiantisLauncher.Clients.Memory;
 using TibiantisLauncher.Profiles;
 using TibiantisLauncher.Validation;
@@ -46,6 +47,12 @@ namespace TibiantisLauncher.Clients
             _memory = new ProcessMemory(_process);
 
             WriteCfgPath();
+
+            while (_process.MainWindowHandle == IntPtr.Zero)
+            {
+                Task.Delay(1000).Wait();
+            }
+            _window = new ClientWindow(_process.MainWindowHandle);
         }
 
         public static Process? FindClientProcess()

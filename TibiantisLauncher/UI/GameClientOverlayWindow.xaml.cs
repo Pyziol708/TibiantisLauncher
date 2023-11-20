@@ -128,6 +128,16 @@ namespace TibiantisLauncher
             OpenUrl($"https://tibiantis.info/library/map#{position.X},{position.Y},{position.Z},8");
         }
 
+        private void TibiantisInfoButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenUrl("https://tibiantis.info");
+        }
+
+        private void TibiantisXyzButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenUrl("https://tibiantis.xyz");
+        }
+
         private void OpenUrl(string url)
         {
             Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });

@@ -36,6 +36,7 @@ namespace TibiantisLauncher.Clients
             _process.StartInfo.WorkingDirectory = @$"{clientDir}";
             _process.StartInfo.FileName = _clientFullPath;
             _process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+            _process.StartInfo.CreateNoWindow = true;
             _process.EnableRaisingEvents = true;
             _process.Exited += OnExit;
         }
@@ -48,11 +49,6 @@ namespace TibiantisLauncher.Clients
         public virtual void Start()
         {
             _process.Start();
-            while(_process.MainWindowHandle == IntPtr.Zero)
-            {
-                Task.Delay(1000).Wait();
-            }
-            _window = new ClientWindow(_process.MainWindowHandle);
         }
 
         public void Dispose()
