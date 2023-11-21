@@ -122,10 +122,16 @@ namespace TibiantisLauncher
             OpenUrl("https://tibiantis.online/?page=character");
         }
 
-        private void MapViewerButton_Click(object sender, RoutedEventArgs e)
+        private void InfoMapViewerButton_Click(object sender, RoutedEventArgs e)
         {
             var position = App.GameClient!.ReadPlayerPosition();
             OpenUrl($"https://tibiantis.info/library/map#{position.X},{position.Y},{position.Z},8");
+        }
+
+        private void NetMapViewerButton_Click(object sender, RoutedEventArgs e)
+        {
+            var position = App.GameClient!.ReadPlayerPosition();
+            OpenUrl($"https://tibiantis.net/map_viewer/#zoom,16,position,{position.X},{position.Y},{position.Z}");
         }
 
         private void TibiantisInfoButton_Click(object sender, RoutedEventArgs e)
