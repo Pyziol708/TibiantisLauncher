@@ -1,6 +1,7 @@
-﻿using Serilog;
-using System;
+﻿using System;
+using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
@@ -15,7 +16,6 @@ namespace TibiantisLauncher
     /// </summary>
     public partial class App : Application
     {
-        private readonly ILogger logger;
         internal static GameClient? GameClient { get; set; }
         internal static CamPlayer? CamPlayer { get; set; }
 
@@ -23,26 +23,23 @@ namespace TibiantisLauncher
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
-
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .WriteTo.File("tibiantis-launcher.log")
-                .CreateLogger();
-
-            logger = Log.ForContext<App>();
         }
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
+            string logFilePath = "tibiantis-launcher.log";
+            Trace.Listeners.Add(new TextWriterTraceListener(logFilePath));
+            File.CreateText(logFilePath);
+
             ShutdownMode = ShutdownMode.OnLastWindowClose;
 
             try
             {
                 LauncherValidator.ValidateLauncherNotRunning();
-                ProfileManager.Instance.CreateProfilesDirectory();
                 GameClientValidator.ValidateClientExistence();
                 GameClientValidator.ValidateClientVersion();
                 GameClientValidator.ValidateClientNotRunning();
+                ProfileManager.Instance.CreateProfilesDirectory();
             }
             catch (ValidationException ex)
             {
@@ -52,7 +49,7 @@ namespace TibiantisLauncher
             }
             catch (UnauthorizedAccessException ex)
             {
-                logger.Fatal(ex, "Application terminated unexpectedly");
+                Trace.TraceError($"Application terminated unexpectedly: {ex}");
                 MessageBox.Show("Access denied while attempting to create profiles folder in client directory.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 Shutdown(0x5);
                 return;
@@ -67,7 +64,7 @@ namespace TibiantisLauncher
             }
             catch (Exception ex)
             {
-                logger.Fatal(ex, "Application terminated unexpectedly");
+                Trace.TraceError($"Application terminated unexpectedly: {ex}");
                 MessageBox.Show("Tibiantis Launcher terminated unexpectedly. Please report this issue to k.standarski@gmail.com.\r\nPlease remember to attach tibiantis-launcher.log file!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 Shutdown(0x1);
             }
@@ -75,12 +72,12 @@ namespace TibiantisLauncher
 
         private void Application_Exit(object sender, ExitEventArgs e)
         {
-            Log.CloseAndFlush();
+            GameClient?.UnsetConfig();
         }
 
         private void Application_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
-            logger.Fatal(e.Exception, "Application terminated unexpectedly");
+            Trace.TraceError($"Application terminated unexpectedly: {e.Exception}");
             MessageBox.Show("Tibiantis Launcher terminated unexpectedly. Please report this issue to k.standarski@gmail.com.\r\nPlease remember to attach tibiantis-launcher.log file!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown(0x1);
         }

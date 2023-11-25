@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Controls;
+using System.Windows.Threading;
 
 namespace TibiantisLauncher
 {
@@ -18,19 +19,16 @@ namespace TibiantisLauncher
 
         public PingMeter()
         {
-            Task.Run(Start);
-        }
-
-        private async Task Start()
-        {
-            while (true)
-                await CheckPing();
+            DispatcherTimer timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromSeconds(3);
+            timer.Tick += async (sender, e) => await CheckPing();
+            timer.Start();
         }
 
         public async Task CheckPing()
         {
             Ping ping = new Ping();
-            PingReply pingReply = await ping.SendPingAsync(_host);
+            PingReply pingReply = await ping.SendPingAsync(_host, 1200);
 
             if (pingReply.Status == IPStatus.Success)
             {
@@ -38,12 +36,6 @@ namespace TibiantisLauncher
                 return;
             }
 
-            _currentPing = int.MaxValue;
-        }
-
-        public async Task CancelCheckPing()
-        {
-            await Task.Delay(1000);
             _currentPing = int.MaxValue;
         }
     }

@@ -46,26 +46,27 @@
         </Style>
     </Window.Resources>
     <Grid Margin="4,4,4,4" IsManipulationEnabled="True" MinWidth="100">
+        <Label x:Name="PingLabel" Content="-" HorizontalAlignment="Left" Margin="82,0,0,0" VerticalAlignment="Top"/>
+        <Label Content="Ping [ms]:" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <Label Content="Experience:" HorizontalAlignment="Left" Margin="0,30,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="ExperienceLabel" Content="-" HorizontalAlignment="Left" Margin="89,30,0,0" VerticalAlignment="Top"/>
         <Label Content="Level:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,55,0,0"/>
         <Label x:Name="LevelLabel" Content="-" HorizontalAlignment="Left" Margin="50,55,0,0" VerticalAlignment="Top"/>
-        <Label Content="Experience:" HorizontalAlignment="Left" Margin="0,30,0,0" VerticalAlignment="Top"/>
-        <Label Content="Exp./h:" HorizontalAlignment="Left" Margin="0,115,0,0" VerticalAlignment="Top"/>
-        <Label Content="Next level in:" HorizontalAlignment="Left" Margin="0,140,0,0" VerticalAlignment="Top"/>
-        <Label Content="Ping [ms]:" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-        <Label x:Name="ExperienceLabel" Content="-" HorizontalAlignment="Left" Margin="89,30,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="ExperiencePerHourLabel" Content="-" HorizontalAlignment="Left" Margin="59,115,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="LevelTimeRemainingLabel" Content="-" HorizontalAlignment="Left" Margin="99,140,0,0" VerticalAlignment="Top"/>
-        <Label Content="Quick links:" HorizontalAlignment="Left" Margin="1,291,0,0" VerticalAlignment="Top"/>
+        <ProgressBar x:Name="LevelProgressBar" HorizontalAlignment="Center" Height="5" Margin="0,80,0,0" VerticalAlignment="Top" Width="200" BorderBrush="Black" Background="{x:Null}"/>
         <Label Content="Exp. left:" HorizontalAlignment="Left" Margin="0,90,0,0" VerticalAlignment="Top"/>
         <Label x:Name="ExperienceRemainingLabel" Content="-" HorizontalAlignment="Left" Margin="70,90,0,0" VerticalAlignment="Top"/>
-        <ProgressBar x:Name="LevelProgressBar" HorizontalAlignment="Center" Height="5" Margin="0,80,0,0" VerticalAlignment="Top" Width="200" BorderBrush="Black" Background="{x:Null}" Value="100"/>
+        <Label Content="Exp./h:" HorizontalAlignment="Left" Margin="0,115,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="ExperiencePerHourLabel" Content="-" HorizontalAlignment="Left" Margin="59,115,0,0" VerticalAlignment="Top"/>
+        <Label Content="Next level in:" HorizontalAlignment="Left" Margin="0,140,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="LevelTimeRemainingLabel" Content="-" HorizontalAlignment="Left" Margin="99,140,0,0" VerticalAlignment="Top"/>
         <Button x:Name="ResetCounterButton" Content="Reset Counter" HorizontalAlignment="Center" Margin="0,165,0,0" VerticalAlignment="Top" Click="ResetCounterButton_Click" Padding="8,0,8,0"/>
+        <Image x:Name="CurrentImage" HorizontalAlignment="Left" Height="100" Margin="1,190,0,0" VerticalAlignment="Top" Width="208"/>
+        <Label Content="Quick links:" HorizontalAlignment="Left" Margin="1,291,0,0" VerticalAlignment="Top"/>
         <Button x:Name="CharacterSearchButton" Content="Search Character Page" HorizontalAlignment="Center" Margin="0,316,0,0" VerticalAlignment="Top" Click="CharacterSearchButton_Click" Padding="8,0,8,0"/>
         <Button x:Name="InfoMapViewerButton" Content="Map Viewer (tibiantis.info)" HorizontalAlignment="Center" Margin="0,366,0,0" VerticalAlignment="Top" Click="InfoMapViewerButton_Click" Padding="8,0,8,0"/>
-        <Label x:Name="PingLabel" Content="-" HorizontalAlignment="Left" Margin="82,0,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="NetMapViewerButton" Content="Map Viewer (tibiantis.net)" HorizontalAlignment="Center" Margin="0,341,0,0" VerticalAlignment="Top" Click="NetMapViewerButton_Click" Padding="8,0,8,0"/>
         <Button x:Name="TibiantisInfoButton" Content="tibiantis.info" HorizontalAlignment="Center" Margin="0,391,0,0" VerticalAlignment="Top" Click="TibiantisInfoButton_Click" Padding="8,0,8,0"/>
         <Button x:Name="TibiantisXyzButton" Content="tibiantis.xyz" HorizontalAlignment="Center" Margin="0,416,0,0" VerticalAlignment="Top" Click="TibiantisXyzButton_Click" Padding="8,0,8,0"/>
         <Label Content="Do you like my work? Please,&#xD;&#xA;donate to Fikolec / Ab'dendriel :)" HorizontalAlignment="Center" Height="36" Margin="0,436,0,0" VerticalAlignment="Top" Width="200" FontSize="10" Foreground="#FFA4A4A4"/>
-        <Button x:Name="NetMapViewerButton" Content="Map Viewer (tibiantis.net)" HorizontalAlignment="Center" Margin="0,341,0,0" VerticalAlignment="Top" Click="NetMapViewerButton_Click" Padding="8,0,8,0"/>
     </Grid>
 </Window>

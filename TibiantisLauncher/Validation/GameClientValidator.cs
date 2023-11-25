@@ -35,9 +35,6 @@ namespace TibiantisLauncher.Validation
         {
             if (string.IsNullOrEmpty(path))
                 throw new ValidationException($"Specified cfg path is empty.");
-
-            if (path.Length > GameClient.CfgPathMaxLength)
-                throw new ValidationException($"Specified cfg path \"{path}\" is too long to inject.");
         }
     }
 }
