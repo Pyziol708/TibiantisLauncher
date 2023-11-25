@@ -20,7 +20,7 @@ namespace TibiantisLauncher
         public GameClientOverlayWindow()
         {
             InitializeComponent();
-
+            VersionLabel.Content = $"v{App.Version}";
             _pingMeter = new PingMeter();
 
             RefreshWindowState();

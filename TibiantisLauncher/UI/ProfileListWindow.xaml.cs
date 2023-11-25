@@ -19,9 +19,7 @@ namespace TibiantisLauncher
             InitializeComponent();
             _profileManager = ProfileManager.Instance;
 
-            string? version = Assembly.GetEntryAssembly()?.GetName()?.Version?.ToString(3);
-
-            VersionLabel.Content = $"v{version}";
+            VersionLabel.Content = $"v{App.Version}";
             WindowDragHandle.MouseLeftButtonDown += (sender, e) => DragMove();
 
             _profileManager.LoadProfiles();

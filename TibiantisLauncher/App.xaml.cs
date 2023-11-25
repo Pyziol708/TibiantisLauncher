@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
@@ -24,6 +25,8 @@ namespace TibiantisLauncher
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
         }
+
+        public static string? Version { get => Assembly.GetEntryAssembly()?.GetName()?.Version?.ToString(3); }
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
