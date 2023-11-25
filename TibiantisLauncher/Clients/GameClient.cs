@@ -1,26 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using TibiantisLauncher.Clients.Memory;
 using TibiantisLauncher.Profiles;
 using TibiantisLauncher.Validation;
 
 namespace TibiantisLauncher.Clients
 {
-    internal struct PlayerStats
-    {
-        public int Level { get; set; }
-        public int Experience { get; set; }
-    }
-
-    internal struct Position
-    {
-        public int X { get; set; }
-        public int Y { get; set; }
-        public int Z { get; set; }
-    }
-
     internal class GameClient : Client
     {
         public const string FileName = "Tibiantis.exe";
@@ -28,10 +15,12 @@ namespace TibiantisLauncher.Clients
 
         public const int CfgPathMaxLength = 23;
         public const string ClientVersion = "1.0";
+        private readonly ImageProcessor _imageProcessor = new ImageProcessor();
 
         protected override string _clientFullPath => ClientFullPath;
-        public bool IsConnected { get => _memory?.ReadInt(MemoryAddresses.ConnectionStatus) > 8; }
         public static string ClientFullPath => Path.Combine(ClientDirectoryFullPath, FileName);
+        public static string ConfigFullPath => Path.Combine(ClientDirectoryFullPath, "game", "Tibiantis.cfg");
+        public static string ConfigBackupFullPath => Path.Combine(ClientDirectoryFullPath, "game", "Tibiantis.cfg.bak");
         private Profile? _profile { get; init; }
 
         public GameClient(Profile profile) : base()
@@ -39,19 +28,56 @@ namespace TibiantisLauncher.Clients
             _profile = profile;
         }
 
+        private void EnsureConfigBackup()
+        {
+            if (File.Exists(ConfigBackupFullPath))
+                return;
+
+            if (File.Exists(ConfigFullPath))
+                File.Copy(ConfigFullPath, ConfigBackupFullPath);
+        }
+
+        public void SetConfig()
+        {
+            if (_profile == null)
+                throw new NullReferenceException(nameof(_profile));
+
+            var sourcePath = Path.Combine(ClientDirectoryFullPath, _profile.CfgPath);
+            if (File.Exists(sourcePath))
+                File.Copy(sourcePath, ConfigFullPath, true);
+        }
+
+        public void UnsetConfig()
+        {
+            if (_profile == null)
+                throw new NullReferenceException(nameof(_profile));
+
+            var sourcePath = ConfigFullPath;
+            if (File.Exists(sourcePath))
+                File.Copy(sourcePath, Path.Combine(ClientDirectoryFullPath, _profile.CfgPath), true);
+        }
+
         public override void Start()
         {
+            EnsureConfigBackup();
+            SetConfig();
             GameClientValidator.ValidateCfgPath(_profile?.CfgPath);
 
             base.Start();
-            _memory = new ProcessMemory(_process);
+            //_memory = new ProcessMemory(_process);
 
-            WriteCfgPath();
+            //WriteCfgPath();
 
+            int tries = 0;
             while (_process.MainWindowHandle == IntPtr.Zero)
             {
                 Task.Delay(1000).Wait();
+                tries++;
+
+                if (tries >= 15)
+                    throw new Exception("Client window not found");
             }
+
             _window = new ClientWindow(_process.MainWindowHandle);
         }
 
@@ -68,58 +94,15 @@ namespace TibiantisLauncher.Clients
             return process;
         }
 
-        public void WriteCfgPath()
+        public async Task<int?> GetPlayerExperience()
         {
-            if (_memory is null)
-                throw new NullReferenceException(nameof(_memory));
+            var rightPanelBitmap = Window?.CaptureRightPanel();
+            if (rightPanelBitmap == null)
+                return null;
 
-            if (_profile is null)
-                throw new NullReferenceException(nameof(_profile));
+            var experience = await _imageProcessor.ExtractExperiencePointsAsync(rightPanelBitmap);
 
-            _memory.WriteString(MemoryAddresses.CfgPath, _profile.CfgPath);
-        }
-
-        public Position ReadPlayerPosition()
-        {
-            var playerId = _memory?.ReadPlayerId();
-            var homePosition = new Position
-            {
-                X = 32369,
-                Y = 32240,
-                Z = 7
-            };
-
-            if (playerId == null)
-                return homePosition;
-
-            for (long i = MemoryAddresses.BattleListStart; i < MemoryAddresses.BattleListEnd; i += MemoryAddresses.BattleListCreatureSize)
-            {
-                if (_memory?.ReadInt(i) == playerId)
-                {
-                    return new Position
-                    {
-                        X = _memory.ReadInt(i + MemoryAddresses.BattleListOffsetPositionX),
-                        Y = _memory.ReadInt(i + MemoryAddresses.BattleListOffsetPositionY),
-                        Z = _memory.ReadInt(i + MemoryAddresses.BattleListOffsetPositionZ)
-                    };
-                }
-            }
-
-            return homePosition;
-        }
-
-        public PlayerStats ReadPlayerStats()
-        {
-            if (_memory is null)
-                throw new NullReferenceException(nameof(_memory));
-
-            var stats = new PlayerStats
-            {
-                Experience = _memory.ReadInt(MemoryAddresses.Experience),
-                Level = _memory.ReadInt(MemoryAddresses.Level),
-            };
-
-            return stats;
+            return experience;
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using Serilog;
 using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Threading;
@@ -13,8 +15,6 @@ namespace TibiantisLauncher
     {
         private DispatcherTimer _playerStatsTimer;
         private DispatcherTimer _windowTimer;
-        private bool _locked = true;
-        private PlayerStats _playerStats;
         private ExperienceCalculator? _experienceCalculator;
         private PingMeter _pingMeter;
 
@@ -25,7 +25,6 @@ namespace TibiantisLauncher
             _pingMeter = new PingMeter();
 
             RefreshWindowState();
-            RefreshPlayerStats();
 
             _windowTimer = new DispatcherTimer();
             _windowTimer.Interval = TimeSpan.FromMilliseconds(250);
@@ -33,8 +32,8 @@ namespace TibiantisLauncher
             _windowTimer.Start();
 
             _playerStatsTimer = new DispatcherTimer();
-            _playerStatsTimer.Interval = TimeSpan.FromSeconds(1);
-            _playerStatsTimer.Tick += (sender, e) => RefreshPlayerStats();
+            _playerStatsTimer.Interval = TimeSpan.FromSeconds(2);
+            _playerStatsTimer.Tick += async (sender, e) => await RefreshPlayerStats();
             _playerStatsTimer.Start();
         }
 
@@ -53,12 +52,9 @@ namespace TibiantisLauncher
             if (IsFocused)
                 window?.Activate();
 
-            if (window.IsActive())
+            if (window != null && window.IsActive)
                 newWindowState = WindowState.Normal;
             else
-                newWindowState = WindowState.Minimized;
-
-            if (!gameClient!.IsConnected)
                 newWindowState = WindowState.Minimized;
 
             if (WindowState != newWindowState)
@@ -76,45 +72,54 @@ namespace TibiantisLauncher
             }
         }
 
-        private void RefreshPlayerStats()
+        private async Task RefreshPlayerStats()
         {
             var gameClient = App.GameClient;
-            if (gameClient == null || !gameClient.IsConnected)
+            if (gameClient == null)
             {
                 if (_experienceCalculator != null)
                     _experienceCalculator = null;
+
                 return;
             }
 
-            _playerStats = gameClient.ReadPlayerStats();
+            int? experience = await gameClient.GetPlayerExperience();
 
             if (_experienceCalculator == null)
-                _experienceCalculator = new ExperienceCalculator(_playerStats.Experience);
+                _experienceCalculator = new ExperienceCalculator(experience);
             else
-                _experienceCalculator?.Tick(_playerStats.Level, _playerStats.Experience);
+                _experienceCalculator?.Tick(experience);
 
-            //WindowState = gameClient.GetWindowState();
-            PingLabel.Content = string.Format("{0} ms", _pingMeter.CurrentPing > 1000 ? ">1000" : _pingMeter.CurrentPing);
-            LevelLabel.Content = _playerStats.Level;
-            ExperienceLabel.Content = string.Format("{0:0,0}", _playerStats.Experience);
-            LevelProgressBar.Minimum = _experienceCalculator!.ExperienceStats.ExperienceForLevel;
-            LevelProgressBar.Maximum = _experienceCalculator!.ExperienceStats.ExperienceForNextLevel;
-            LevelProgressBar.Value = _playerStats.Experience;
-            ExperienceRemainingLabel.Content = string.Format("{0:0,0}", _experienceCalculator!.ExperienceStats.RemainingExperience);
-            ExperiencePerHourLabel.Content = _experienceCalculator!.ExperienceStats.ExperiencePerHour > 0 ? string.Format("{0:0,0}", _experienceCalculator.ExperienceStats.ExperiencePerHour) : "-";
-            int hours = _experienceCalculator!.ExperienceStats.RemainingTotalMinutes > 0 ? (int)Math.Floor((double)_experienceCalculator!.ExperienceStats.RemainingTotalMinutes / 60) : 0;
-            int minutes = _experienceCalculator.ExperienceStats.RemainingTotalMinutes % 60;
-            var remaingTime = "";
-            if (hours > 0)
-                remaingTime = hours + "h ";
-            if (minutes > 0)
-                remaingTime += minutes + "m";
-            LevelTimeRemainingLabel.Content = _experienceCalculator.ExperienceStats.RemainingTotalMinutes > 0 ? remaingTime : "-";
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                PingLabel.Content = string.Format("{0} ms", _pingMeter.CurrentPing > 1000 ? ">1000" : _pingMeter.CurrentPing);
+                LevelLabel.Content = _experienceCalculator!.ExperienceStats.Level?.ToString() ?? "-";
+                ExperienceLabel.Content = _experienceCalculator!.ExperienceStats.Experience == null ? "-" : string.Format("{0:0,0}", _experienceCalculator!.ExperienceStats.Experience);
+                LevelProgressBar.Minimum = _experienceCalculator!.ExperienceStats.ExperienceForLevel ?? 0;
+                LevelProgressBar.Maximum = _experienceCalculator!.ExperienceStats.ExperienceForNextLevel ?? 1;
+                LevelProgressBar.Value = _experienceCalculator!.ExperienceStats.Experience ?? 0;
+                ExperienceRemainingLabel.Content = _experienceCalculator!.ExperienceStats.RemainingExperience == null ? "-" : string.Format("{0:0,0}", _experienceCalculator!.ExperienceStats.RemainingExperience);
+                ExperiencePerHourLabel.Content = _experienceCalculator!.ExperienceStats.ExperiencePerHour == null ? "-" : string.Format("{0:0,0}", _experienceCalculator.ExperienceStats.ExperiencePerHour);
+                int hours = _experienceCalculator!.ExperienceStats.RemainingTotalMinutes >= 60 ? (int)Math.Floor((double)_experienceCalculator!.ExperienceStats.RemainingTotalMinutes / 60) : 0;
+                int minutes = (_experienceCalculator.ExperienceStats.RemainingTotalMinutes ?? 0) % 60;
+                var remaingTime = string.Empty;
+                
+                if (hours > 0)
+                    remaingTime = hours + "h ";
+                
+                if (minutes > 0)
+                    remaingTime += minutes + "m";
+                
+                if (hours + minutes == 0)
+                    remaingTime = "< 1m";
+
+                LevelTimeRemainingLabel.Content = _experienceCalculator.ExperienceStats.RemainingTotalMinutes != null ? remaingTime : "-";
+            });
         }
 
         private void ResetCounterButton_Click(object sender, RoutedEventArgs e)
         {
-            _experienceCalculator?.Reset(_playerStats.Experience);
+            _experienceCalculator?.Reset();
         }
 
         private void CharacterSearchButton_Click(object sender, RoutedEventArgs e)
@@ -124,14 +129,12 @@ namespace TibiantisLauncher
 
         private void InfoMapViewerButton_Click(object sender, RoutedEventArgs e)
         {
-            var position = App.GameClient!.ReadPlayerPosition();
-            OpenUrl($"https://tibiantis.info/library/map#{position.X},{position.Y},{position.Z},8");
+            OpenUrl($"https://tibiantis.info/library/map");
         }
 
         private void NetMapViewerButton_Click(object sender, RoutedEventArgs e)
         {
-            var position = App.GameClient!.ReadPlayerPosition();
-            OpenUrl($"https://tibiantis.net/map_viewer/#zoom,16,position,{position.X},{position.Y},{position.Z}");
+            OpenUrl($"https://tibiantis.net/map_viewer/");
         }
 
         private void TibiantisInfoButton_Click(object sender, RoutedEventArgs e)

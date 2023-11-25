@@ -39,10 +39,10 @@ namespace TibiantisLauncher
             try
             {
                 LauncherValidator.ValidateLauncherNotRunning();
-                ProfileManager.Instance.CreateProfilesDirectory();
                 GameClientValidator.ValidateClientExistence();
                 GameClientValidator.ValidateClientVersion();
                 GameClientValidator.ValidateClientNotRunning();
+                ProfileManager.Instance.CreateProfilesDirectory();
             }
             catch (ValidationException ex)
             {
@@ -75,6 +75,7 @@ namespace TibiantisLauncher
 
         private void Application_Exit(object sender, ExitEventArgs e)
         {
+            App.GameClient?.UnsetConfig();
             Log.CloseAndFlush();
         }
 
