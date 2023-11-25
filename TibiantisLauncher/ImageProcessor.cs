@@ -49,6 +49,7 @@ namespace TibiantisLauncher
             var xpRect = new Rectangle(expLabelLocation.Value.X + 65, expLabelLocation.Value.Y, 70, 10);
             var xpBitmap = sourceBitmap.Clone(xpRect, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             var xpMat = xpBitmap.ToMat();
+            
 
             SortedDictionary<int, string> digits = new SortedDictionary<int, string>();
 
@@ -113,6 +114,7 @@ namespace TibiantisLauncher
                 }
             });
 
+            resultMat.Dispose();
 
             return resultList;
         }

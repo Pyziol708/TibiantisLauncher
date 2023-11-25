@@ -102,6 +102,8 @@ namespace TibiantisLauncher.Clients
 
             var experience = await _imageProcessor.ExtractExperiencePointsAsync(rightPanelBitmap);
 
+            rightPanelBitmap.Dispose();
+
             return experience;
         }
     }
