@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:TibiantisLauncher.UI"
         mc:Ignorable="d"
         Title="Tibiantis Launcher" Height="480" Width="360" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" WindowStyle="None"
-        UseLayoutRounding="True" BorderBrush="#FF1B0101" BorderThickness="1,1,1,1">
+        UseLayoutRounding="True" BorderBrush="#FF1B0101" BorderThickness="1,1,1,1" Loaded="window_Loaded">
     <Window.Resources>
         <local:ProfileCounterConverter x:Key="ProfileCounterConverter"/>
         <local:IsSelectedIndexConverter x:Key="IsSelectedIndex"/>

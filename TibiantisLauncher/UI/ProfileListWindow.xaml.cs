@@ -82,11 +82,18 @@ namespace TibiantisLauncher
         {
             if (ProfileListBox.SelectedIndex != -1)
             {
-                if (e.Key == System.Windows.Input.Key.F2)
-                    ShowRenameProfileWindow();
-
-                if (e.Key == System.Windows.Input.Key.Delete)
-                    ShowRemoveProfileWindow();
+                switch (e.Key)
+                {
+                    case System.Windows.Input.Key.F2:
+                        ShowRenameProfileWindow();
+                        break;
+                    case System.Windows.Input.Key.Delete:
+                        ShowRemoveProfileWindow();
+                        break;
+                    case System.Windows.Input.Key.Enter:
+                        StartGameClient();
+                        break;
+                }
             }
         }
         #endregion
@@ -170,6 +177,11 @@ namespace TibiantisLauncher
 
             if (result == true)
                 _profileManager.RemoveProfile((Profile)ProfileListBox.SelectedItem);
+        }
+
+        private void window_Loaded(object sender, RoutedEventArgs e)
+        {
+            ProfileListBox.Focus();
         }
     }
 }

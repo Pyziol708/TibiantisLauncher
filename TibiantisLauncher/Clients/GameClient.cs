@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using TibiantisLauncher.Profiles;
 using TibiantisLauncher.Validation;
@@ -64,9 +63,6 @@ namespace TibiantisLauncher.Clients
             GameClientValidator.ValidateCfgPath(_profile?.CfgPath);
 
             base.Start();
-            //_memory = new ProcessMemory(_process);
-
-            //WriteCfgPath();
 
             int tries = 0;
             while (_process.MainWindowHandle == IntPtr.Zero)

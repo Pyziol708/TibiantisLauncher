@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TibiantisLauncher.Clients;
 
 namespace TibiantisLauncher
 {
@@ -35,12 +31,7 @@ namespace TibiantisLauncher
             Reset(experience);
         }
 
-        public void Reset()
-        {
-            Reset(_experienceStats.Experience);
-        }
-
-        public void Reset(int? experience)
+        private void Reset(int? experience)
         {
             _experienceStats = new ExperienceStats { Experience = experience };
             
@@ -88,16 +79,11 @@ namespace TibiantisLauncher
             {
                 if (_sessionStopWatch.IsRunning || _sessionStopWatch.Elapsed.TotalSeconds > 0)
                 {
-                    _experienceStats.ExperiencePerHour = RoundToHundred((int)Math.Floor(_experienceGained * 60 / Math.Max(_sessionStopWatch.Elapsed.TotalMinutes, 2)));
+                    _experienceStats.ExperiencePerHour = (int)Math.Floor(_experienceGained * 60 / Math.Max(_sessionStopWatch.Elapsed.TotalMinutes, 2));
                     var remainingMinutes = _experienceStats.ExperiencePerHour > 0 ? _experienceStats.RemainingExperience / (_experienceStats.ExperiencePerHour / 60) : 0;
                     _experienceStats.RemainingTotalMinutes = remainingMinutes;
                 }
             }
-        }
-
-        private int RoundToHundred(int number)
-        {
-            return (number + 50) / 100 * 100;
         }
 
         public static int GetExperienceForLevel(int level)
