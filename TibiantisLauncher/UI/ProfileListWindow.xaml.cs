@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Threading;
 using System.Windows;
+using System.Windows.Input;
 using TibiantisLauncher.Clients;
 using TibiantisLauncher.Profiles;
 using TibiantisLauncher.UI;

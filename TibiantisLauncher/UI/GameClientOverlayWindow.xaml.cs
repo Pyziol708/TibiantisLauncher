@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows;
+using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Threading;
 using TibiantisLauncher.Clients;
 
@@ -28,9 +32,21 @@ namespace TibiantisLauncher
             _windowTimer.Start();
 
             _playerStatsTimer = new DispatcherTimer();
-            _playerStatsTimer.Interval = TimeSpan.FromSeconds(2);
+            _playerStatsTimer.Interval = TimeSpan.FromSeconds(1);
             _playerStatsTimer.Tick += async (sender, e) => await RefreshPlayerStats();
             _playerStatsTimer.Start();
+        }
+
+        private bool IsWindowActive()
+        {
+            var activatedHandle = WinApi.GetForegroundWindow();
+
+            if (activatedHandle == IntPtr.Zero)
+                return false;
+
+            IntPtr windowHandle = new WindowInteropHelper(this).Handle;
+
+            return windowHandle == activatedHandle;
         }
 
         private void RefreshWindowState()
@@ -43,10 +59,7 @@ namespace TibiantisLauncher
             }
             ClientWindow? window = gameClient.Window;
 
-            if (IsFocused)
-                window?.Activate();
-
-            var newWindowState = window != null && window.IsActive ? WindowState.Normal : WindowState.Minimized;
+            var newWindowState = IsWindowActive() || window != null && window.IsActive ? WindowState.Normal : WindowState.Minimized;
             var windowRect = window?.GetRect();
 
             if (windowRect != null)
@@ -62,7 +75,7 @@ namespace TibiantisLauncher
             if (WindowState != newWindowState)
             {
                 WindowState = newWindowState;
-                if (newWindowState == WindowState.Normal)
+                if (newWindowState == WindowState.Normal && Keyboard.FocusedElement != CharacterSearchInput)
                     window?.Activate();
             }
         }
@@ -106,6 +119,7 @@ namespace TibiantisLauncher
                     remaingTime = "< 1m";
 
                 LevelTimeRemainingLabel.Content = _experienceCalculator?.ExperienceStats.RemainingTotalMinutes != null ? remaingTime : "-";
+                LevelUpTimeLabel.Content = _experienceCalculator?.ExperienceStats.EstimatedAdvanceTime?.ToShortTimeString() ?? "-";
             });
         }
 
@@ -147,7 +161,7 @@ namespace TibiantisLauncher
 
         private void CharacterSearchButton_Click(object sender, RoutedEventArgs e)
         {
-            OpenUrl("https://tibiantis.online/?page=character");
+            CharacterSearchSubmit();
         }
 
         private void InfoMapViewerButton_Click(object sender, RoutedEventArgs e)
@@ -177,7 +191,55 @@ namespace TibiantisLauncher
 
         private void OverlayWindow_GotFocus(object sender, RoutedEventArgs e)
         {
+            if (Keyboard.FocusedElement != CharacterSearchInput)
+            {
+                App.GameClient?.Window?.Activate();
+            }
+        }
+
+        private void CharacterSearchInput_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            CharacterSearchInput.Clear();
+        }
+
+        private void CharacterSearchInput_KeyDown(object sender, KeyEventArgs e)
+        {
+
+            //if (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9 ||
+            //    e.Key >= Key.F1 && e.Key <= Key.F12 ||
+            //     ||
+            //    e.Key == Key.Escape)
+            //{
+            //    App.GameClient?.Window?.Activate();
+            //}
+        }
+
+        private void CharacterSearchSubmit()
+        {
+            if (!string.IsNullOrWhiteSpace(CharacterSearchInput.Text))
+            {
+                string encodedName = HttpUtility.UrlEncode(CharacterSearchInput.Text.ToLower());
+                OpenUrl($"https://tibiantis.online/index.php?page=character&name={encodedName}");
+                Task.Delay(1000).Wait();
+            }
+            
             App.GameClient?.Window?.Activate();
+        }
+
+        private void CharacterSearchInput_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                CharacterSearchSubmit();
+            }
+
+            if (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9 ||
+                e.Key >= Key.F1 && e.Key <= Key.F12 ||
+                e.Key >= Key.Left && e.Key <= Key.Down ||
+                e.Key == Key.Escape)
+            {
+                App.GameClient?.Window?.Activate();
+            }
         }
     }
 }
