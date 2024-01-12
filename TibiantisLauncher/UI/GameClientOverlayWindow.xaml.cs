@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Threading;
 using TibiantisLauncher.Clients;
 
@@ -13,16 +13,25 @@ namespace TibiantisLauncher
 {
     public partial class GameClientOverlayWindow : Window
     {
+        private readonly Color _redBarColor = Color.FromArgb(0xFF, 0xFF, 0x00, 0x00);
+        private readonly Color _greenBarColor = Color.FromArgb(0xFF, 0x00, 0xC0, 0x00);
+
         private DispatcherTimer _playerStatsTimer;
         private DispatcherTimer _windowTimer;
         private ExperienceCalculator? _experienceCalculator;
         private PingMeter _pingMeter;
+        private CustomTimer _customTimer;
 
         public GameClientOverlayWindow()
         {
-            InitializeComponent();
-            VersionLabel.Content = $"v{App.Version}";
             _pingMeter = new PingMeter();
+            _customTimer = new CustomTimer();
+            _customTimer.Tick += CustomTimerTick;
+
+            InitializeComponent();
+            CustomTimerTextBox.Text = Properties.Settings.Default.TimerInput;
+
+            VersionLabel.Content = $"v{App.Version}";
 
             RefreshWindowState();
 
@@ -67,7 +76,7 @@ namespace TibiantisLauncher
                 if (windowRect.Value.Width < 1000)
                     newWindowState = WindowState.Minimized;
 
-                Left = windowRect.Value.Left + 6;
+                Left = windowRect.Value.Left + 12;
                 Top = windowRect.Value.Top + 50;
                 Width = windowRect.Value.Width * 0.11;
             }
@@ -75,7 +84,7 @@ namespace TibiantisLauncher
             if (WindowState != newWindowState)
             {
                 WindowState = newWindowState;
-                if (newWindowState == WindowState.Normal && Keyboard.FocusedElement != CharacterSearchInput)
+                if (newWindowState == WindowState.Normal && Keyboard.FocusedElement != CharacterSearchTextBox)
                     window?.Activate();
             }
         }
@@ -186,47 +195,36 @@ namespace TibiantisLauncher
 
         private void OpenUrl(string url)
         {
-            Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
+            using (Process p = new Process())
+            {
+                p.StartInfo.FileName = url;
+                p.StartInfo.UseShellExecute = true;
+                p.Start();
+            }
         }
 
         private void OverlayWindow_GotFocus(object sender, RoutedEventArgs e)
         {
-            if (Keyboard.FocusedElement != CharacterSearchInput)
+            if (Keyboard.FocusedElement != CharacterSearchTextBox)
             {
                 App.GameClient?.Window?.Activate();
             }
         }
 
-        private void CharacterSearchInput_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
-        {
-            CharacterSearchInput.Clear();
-        }
-
-        private void CharacterSearchInput_KeyDown(object sender, KeyEventArgs e)
-        {
-
-            //if (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9 ||
-            //    e.Key >= Key.F1 && e.Key <= Key.F12 ||
-            //     ||
-            //    e.Key == Key.Escape)
-            //{
-            //    App.GameClient?.Window?.Activate();
-            //}
-        }
-
         private void CharacterSearchSubmit()
         {
-            if (!string.IsNullOrWhiteSpace(CharacterSearchInput.Text))
+            if (!string.IsNullOrWhiteSpace(CharacterSearchTextBox.Text))
             {
-                string encodedName = HttpUtility.UrlEncode(CharacterSearchInput.Text.ToLower());
+                string encodedName = HttpUtility.UrlEncode(CharacterSearchTextBox.Text.ToLower());
                 OpenUrl($"https://tibiantis.online/index.php?page=character&name={encodedName}");
                 Task.Delay(1000).Wait();
+                CharacterSearchTextBox.Clear();
             }
-            
+
             App.GameClient?.Window?.Activate();
         }
 
-        private void CharacterSearchInput_PreviewKeyDown(object sender, KeyEventArgs e)
+        private void CharacterSearchTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
@@ -240,6 +238,73 @@ namespace TibiantisLauncher
             {
                 App.GameClient?.Window?.Activate();
             }
+        }
+
+        private void CustomTimerTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            CustomTimerButton.IsEnabled = _customTimer?.State != CustomTimerState.Ready || CustomTimerTextBox.Text != "00:00:00";
+        }
+
+        private void CharacterSearchTextBox_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            CharacterSearchTextBox.Clear();
+        }
+
+        private void CustomTimerButton_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleTimer();
+        }
+
+        private void ToggleTimer()
+        {
+            if (_customTimer.State == CustomTimerState.Ready && (string.IsNullOrEmpty(CustomTimerTextBox.Text) || CustomTimerTextBox.Text == "00:00:00"))
+                return;
+
+            if (_customTimer.State == CustomTimerState.Ready)
+            {
+                Properties.Settings.Default.TimerInput = CustomTimerTextBox.Text;
+                Properties.Settings.Default.Save();
+                _customTimer.Start(CustomTimerTextBox.Text);
+                CustomTimerButton.Content = "Reset";
+                CustomTimerBar.Foreground = new SolidColorBrush(_redBarColor);
+                CustomTimerBar.Value = 0;
+                CustomTimerBar.Maximum = _customTimer.TargetSeconds;
+                return;
+            }
+
+            _customTimer.Reset();
+            CustomTimerTextBox.Text = Properties.Settings.Default.TimerInput;
+            CustomTimerButton.Content = "Start";
+            CustomTimerBar.Value = 0;
+            CustomTimerBar.Foreground = new SolidColorBrush(_redBarColor);
+            CustomTimerBar.Maximum = 1;
+        }
+
+        private void CustomTimerTick(object? sender, EventArgs e)
+        {
+            CustomTimerBar.Value = _customTimer.TargetSeconds - _customTimer.CurrentInterval.TotalSeconds;
+            CustomTimerTextBox.Text = _customTimer.TimeString;
+            var barColor = _customTimer.State == CustomTimerState.End ? _greenBarColor : _redBarColor;
+            CustomTimerBar.Foreground = new SolidColorBrush(barColor);
+        }
+
+        private void CustomTimerTextBox_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            CustomTimerTextBox.Clear();
+        }
+
+        private void CustomTimerTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                CustomTimerTextBox.Text = CustomTimerTextBox.Text.Replace('_', '0');
+                ToggleTimer();
+            }
+        }
+
+        private void CustomTimerTextBox_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            CustomTimerTextBox.Text = CustomTimerTextBox.Text.Replace('_', '0');
         }
     }
 }
