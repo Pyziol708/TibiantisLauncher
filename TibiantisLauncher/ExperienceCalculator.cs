@@ -20,7 +20,7 @@ namespace TibiantisLauncher
 
     internal class ExperienceCalculator
     {
-        private const int InvestigatedPeriod = 60;//in minutes
+        private const int InvestigatedPeriod = 15;//in minutes
         private const int ExperienceGainQueueCapacity = InvestigatedPeriod * 60;
         private DateTime? _sessionResetSchedule;
         private Stopwatch _sessionStopWatch = new Stopwatch();
