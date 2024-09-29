@@ -8,8 +8,8 @@
     <UseWPF>true</UseWPF>
     <StartupObject>TibiantisLauncher.App</StartupObject>
     <ApplicationIcon>Resources\Icons\Tibiantis.ico</ApplicationIcon>
-    <AssemblyVersion>1.2.4</AssemblyVersion>
-    <FileVersion>1.2.4</FileVersion>
+    <AssemblyVersion>1.2.5</AssemblyVersion>
+    <FileVersion>1.2.5</FileVersion>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <LangVersion>latestMajor</LangVersion>
   </PropertyGroup>
