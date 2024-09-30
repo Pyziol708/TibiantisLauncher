@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace TibiantisLauncher
@@ -19,9 +20,12 @@ namespace TibiantisLauncher
 
     internal class ExperienceCalculator
     {
+        private const int InvestigatedPeriod = 15;//in minutes
+        private const int ExperienceGainQueueCapacity = InvestigatedPeriod * 60;
         private DateTime? _sessionResetSchedule;
+        private int _experienceGained;
+        private Queue<int> _experienceGainQueue = new();
         private Stopwatch _sessionStopWatch = new();
-        private int _sessionInitialExperience;
         private ExperienceStats _experienceStats;
 
         public ExperienceStats ExperienceStats => _experienceStats;
@@ -38,9 +42,10 @@ namespace TibiantisLauncher
             if (experience != null)
                 _experienceStats.Level = GetLevelFromExperience(experience.Value);
 
-            _sessionInitialExperience = experience ?? 0;
+            _experienceGained = 0;
             _sessionResetSchedule = null;
             _sessionStopWatch.Stop();
+            _experienceGainQueue.Clear();
         }
 
         public void Tick(int? experience)
@@ -60,11 +65,17 @@ namespace TibiantisLauncher
             _experienceStats.Experience = experience;
             _experienceStats.Level = GetLevelFromExperience(experience.Value);
 
+            if (_experienceGainQueue.Count >= ExperienceGainQueueCapacity)
+                _experienceGained -= _experienceGainQueue.Dequeue();
+
+            _experienceGainQueue.Enqueue(experienceGain);
+
             if (experienceGain > 0)
             {
                 if (!_sessionStopWatch.IsRunning)
                     _sessionStopWatch.Restart();
 
+                _experienceGained += experienceGain;
                 _sessionResetSchedule = DateTime.Now.AddMinutes(10);
             }
 
@@ -75,12 +86,11 @@ namespace TibiantisLauncher
                 _experienceStats.RemainingExperience = _experienceStats.ExperienceForNextLevel - experience;
             }
 
-            if (_experienceStats.RemainingExperience != null)
+            if (_experienceGained > 0 && _experienceStats.RemainingExperience != null)
             {
                 if (_sessionStopWatch.IsRunning || _sessionStopWatch.Elapsed.TotalSeconds > 0)
                 {
-                    var totalExperienceGain = experience.Value - _sessionInitialExperience;
-                    _experienceStats.ExperiencePerHour = RoundToHundred((int)Math.Floor(totalExperienceGain / (double)Math.Max(_sessionStopWatch.Elapsed.TotalHours, 0.01)));
+                    _experienceStats.ExperiencePerHour = RoundExperiencePerHour((int)Math.Floor((double)_experienceGained * 60 / Math.Max((double)_experienceGainQueue.Count / InvestigatedPeriod, 1)));
 
                     var remainingMinutes = _experienceStats.ExperiencePerHour > 0 ? _experienceStats.RemainingExperience / ((double)_experienceStats.ExperiencePerHour / 60) : 0;
                     _experienceStats.RemainingTotalMinutes = (int)Math.Round((decimal)remainingMinutes);
@@ -89,8 +99,11 @@ namespace TibiantisLauncher
             }
         }
 
-        private int RoundToHundred(int number)
+        private int RoundExperiencePerHour(int number)
         {
+            if (number < 1000)
+                return (number + 25) / 50 * 50;
+
             return (number + 50) / 100 * 100;
         }
 
