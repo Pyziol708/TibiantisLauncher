@@ -12,7 +12,7 @@ namespace TibiantisLauncher.Clients
         public const string FileName = "Tibiantis.exe";
         private const string ProcessName = "Tibiantis";
 
-        public const string ClientVersion = "1.6";
+        public const string ClientVersion = "1.7";
         private readonly ImageProcessor _imageProcessor = new ImageProcessor();
 
         protected override string _clientFullPath => ClientFullPath;
